@@ -1,0 +1,5 @@
+# Build staff
+dist/
+build/
+
+.vscode/
