@@ -1,5 +1,7 @@
 #pragma once
 #include <Il2cpp_Resolver/Includes.hpp>
+#include <imgui/imgui.h>
+
 #include "./types.hpp"
 
 namespace utils {
@@ -20,8 +22,27 @@ namespace utils {
    */
   bool world2screen(
     Unity::Vector3 world, Unity::CCamera* camera,
-    Unity::Vector3& screen // out
+    Unity::Vector2* out_screen // out
   );
 
+  /**
+   * Prints last error in WinApi (with GetLastError)
+   */
   void print_last_error();
+
+  /**
+   * Makes deep copy of ImDrawData object and returns pointer to it
+   * 
+   * @param original pointer to object to copy
+   * @return pointer to new object. Free it with utils::free_drawdata()
+   */
+  ImDrawData* copy_drawdata(ImDrawData* original);
+
+  /**
+   * Free draw data allocated with utils::copy_drawdata
+   * 
+   * @param data Pointer to object to free
+   * @return `true`  - Success free | `false` - Failed to free
+   */
+  bool free_drawdata(ImDrawData* data);
 }

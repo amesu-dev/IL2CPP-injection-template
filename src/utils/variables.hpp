@@ -21,6 +21,9 @@ namespace global {
 
   extern thread_pool t_pool;
 
+  extern ImDrawData* draw_data;
+  extern std::mutex draw_mutex;
+
   extern HWND original_window;
   extern HWND render_window;
   extern WNDPROC oWndProc;

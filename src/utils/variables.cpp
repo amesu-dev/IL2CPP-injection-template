@@ -15,6 +15,9 @@ namespace global {
 
   thread_pool t_pool { 5 };
 
+  ImDrawData* draw_data = nullptr;
+  std::mutex draw_mutex;
+
   HWND original_window = NULL;
   HWND render_window = NULL;
   WNDPROC oWndProc;

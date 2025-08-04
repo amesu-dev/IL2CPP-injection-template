@@ -1,6 +1,7 @@
 #include "./utils.hpp"
-
 #include "./variables.hpp"
+
+#include <malloc.h>
 
 namespace utils {
   Unity::CCamera* get_camera() {
@@ -13,22 +14,15 @@ namespace utils {
 
   bool world2screen(
     Unity::Vector3 world_pos, Unity::CCamera* camera,
-    Unity::Vector3& screen // out
+    Unity::Vector2* out_screen // out
   ) {
 		if (!camera) return false;
 
     auto* world2screen_ptr = (Unity::Vector3 (__cdecl*) (void*, Unity::Vector3))(global::GameAssembly + 0x3237EA0); // w2screen
-    // auto* world2view_ptr = (Unity::Vector3 (__cdecl*) (void*, Unity::Vector3))(global::GameAssembly + 0x3238010);
     Unity::Vector3 buffer = world2screen_ptr(camera, world_pos);
-    printf("Success!\n");
 
-		if (buffer.x > global::viewport.Width || buffer.y > global::viewport.Height || buffer.x < 0 || buffer.y < 0 || buffer.z < 0) { // check if point is on screen
-			return false;
-		}
-
-		screen.x = buffer.x;
-    screen.y = global::viewport.Height - buffer.y;
-    // screen.y = buffer.y;
+		out_screen->x = buffer.x;
+    out_screen->y = global::viewport.Height - buffer.y;
 
     return true;
 	}
@@ -50,5 +44,46 @@ namespace utils {
     } else {
         std::cout << "Failed to retrieve error message for code: " << errorCode << std::endl;
     }
+  }
+
+  ImDrawData* copy_drawdata(ImDrawData* original) {
+    if (!original) return nullptr;
+
+    auto* new_data = (ImDrawData*)malloc(sizeof(ImDrawData));
+
+    // *new_data = *original;
+    new_data->Valid = original->Valid;
+    new_data->TotalIdxCount = original->TotalIdxCount;
+    new_data->TotalVtxCount = original->TotalVtxCount;
+    new_data->DisplayPos = original->DisplayPos;
+    new_data->DisplaySize = original->DisplaySize;
+    new_data->FramebufferScale = original->FramebufferScale;
+    new_data->CmdListsCount = original->CmdListsCount;
+
+    new_data->CmdLists = (ImDrawList**)calloc(new_data->CmdListsCount, sizeof(ImDrawList*));
+    for (size_t index = 0; index < new_data->CmdListsCount; index += 1) {
+      new_data->CmdLists[index] = (ImDrawList*)malloc(sizeof(ImDrawList));
+
+      memcpy(new_data->CmdLists[index], original->CmdLists[index], sizeof(ImDrawList));
+    }
+
+    return new_data;
+  }
+  
+  bool free_drawdata(ImDrawData* data) {
+    if (!data) return true;
+
+    try { // free(void*) throws error when failed to free memory
+      for (size_t index = 0; index < data->CmdListsCount; index += 1) {
+        free(data->CmdLists[index]);
+      }
+      free(data->CmdLists);
+      free(data);
+    } catch (std::exception err) {
+      printf("Exception when free draw data: %s\n", err.what());
+      return false;
+    }
+
+    return true;
   }
 }

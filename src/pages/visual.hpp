@@ -36,11 +36,6 @@ public:
         ImGui::SetTooltip("0 = Main\n1 = Character");
       // ImGui::SliderFloat("##ViewFOV", &this->ViewmodelFOV, 20, 180, "Viewmodel FOV: %.0f");
     }
-
-    //ImGui::Checkbox("Watermark", &this->watermark);
-    ImGui::SliderInt("Line Style", &this->linetype, 1, 2);
-    if (ImGui::IsItemHovered())
-      ImGui::SetTooltip("1 = Bottom Screen\n2 = Center Screen");
   }
 
 protected:
@@ -58,8 +53,6 @@ protected:
   bool rainbow_crosshair = false;
   ImColor crosshair_color = ImColor(0, 255, 255); // cyan
   int crosshair_size = 8; // px
-  
-  int linetype = 1;
 
 public:
   bool is_snaplines() const { return this->player_snaplines; }
@@ -106,46 +99,28 @@ public:
   void draw_snaplines() {
     if (!this->player_snaplines) return;
 
-    // Render each 4th frame
-    // auto frames_count = ImGui::GetFrameCount();
-    // if (!(frames_count % 4)) return;
-    
     auto* camera = utils::get_camera();
-    
+
     ImColor color = this->snapline_color;
 
     if (this->snapline_rainbow)
       color = ImColor(vars::Rainbow.x, vars::Rainbow.y, vars::Rainbow.z);
 
     ImVec2 center = { global::viewport.Width / 2, global::viewport.Height / 2 };
-    Unity::Vector3 pos {0,0,0};
+    Unity::Vector2 onscreen_pos { 0, 0 };
 
     global::players_mutex.lock();
     // ImGui::GetOverlayDrawList()->Clear();
     auto* drawlist = ImGui::GetBackgroundDrawList();
     for (auto& player : global::player_list) {
-      printf("Player is_valid %d\n", player.is_valid());
       if (!player.is_valid()) break;
 
-      // EntityManager char_mng = player.get_char_manager();
-      // auto root_pos = char_mng.get_obj()->GetTransform()->GetPosition();
+      EntityManager char_mng = player.get_char_manager();
+      auto root_pos = char_mng.get_obj()->GetTransform()->GetPosition();
 
-      // Unity::Vector3 root_pos = {0,0,0};
-      // root_pos.y -= 0.4f;
-    }
-    if (utils::world2screen(Unity::Vector3(0,0,0), camera, pos)) {
-      printf("end!\n");
-      printf("{ %f, %f, %f }\n", pos.x, pos.y, pos.z);
-      
-      drawlist->AddLine(ImVec2(center.x, center.y), ImVec2(pos.x, pos.y), color, 2.0f);
-      // switch (this->linetype) {
-      //   case 1:
-      //     ImGui::GetOverlayDrawList()->AddLine(ImVec2(center.x, global::viewport.Height), ImVec2(pos.x, pos.y), color, 1.5f);
-      //     break;
-      //   case 2:
-      //     ImGui::GetOverlayDrawList()->AddLine(ImVec2(center.x, center.y), ImVec2(pos.x, pos.y), color, 1.5f);
-      //     break;
-      // }
+      if (utils::world2screen(root_pos, camera, &onscreen_pos)) {
+        drawlist->AddLine(ImVec2(center.x, center.y), ImVec2(onscreen_pos.x, onscreen_pos.y), color, 2.0f);
+      }
     }
     global::players_mutex.unlock();
 

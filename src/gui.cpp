@@ -13,6 +13,7 @@
 //! May be nullptr
 static visual_page* vpage = nullptr;
 
+
 void init_gui() {
 	ImGui::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
@@ -92,13 +93,12 @@ void render_gui() {
 	}
 	vars::Rainbow = ImVec4(isRed, isGreen, isBlue, 1.0f);
 
-	if (vars::watermark) {
-		render::DrawOutlinedText(
-			gameFont, ImVec2(global::viewport.Width / 2, 5), 13.0f,
-			ImColor(vars::Rainbow.x, vars::Rainbow.y, vars::Rainbow.z), true,
-			"[ %.1f FPS ]", ImGui::GetIO().Framerate
-		);
-	}
+	// Draw FPS
+	render::DrawOutlinedText(
+		gameFont, ImVec2(global::viewport.Width / 2, 5), 13.0f,
+		ImColor(vars::Rainbow.x, vars::Rainbow.y, vars::Rainbow.z), true,
+		"[ %.1f FPS ]", ImGui::GetIO().Framerate
+	);
 
 	if (show_menu) {
 		draw_menu();
@@ -125,6 +125,14 @@ void render_gui() {
 
 	// ! End Scene !
 	ImGui::Render();
+
+	// Pass rendered data
+	global::draw_mutex.lock();
+	// global::draw_data = *ImGui::GetDrawData();
+	utils::free_drawdata(global::draw_data);
+	global::draw_data = utils::copy_drawdata(ImGui::GetDrawData());
+	
+	global::draw_mutex.unlock();
 }
 
 LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam) {
@@ -135,7 +143,6 @@ LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 }
 
 uint64_t render_task_id = -1ULL;
-static ImDrawData draw_data {};
 HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags) {
 	void* m_pThisThread = IL2CPP::Thread::Attach(IL2CPP::Domain::Get());
 
@@ -184,20 +191,19 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 		) {
 			// Create new task if only there is no tasks
 			render_task_id = global::t_pool.add_task(render_gui);
-			printf("Created task %lld\n", render_task_id);
 		}
 		// render_gui();
 	} catch (...) {}
 
-	auto* data = ImGui::GetDrawData();
-	if (data) draw_data = *data;
-
 	// Wait for first draw data...
-	if (draw_data.Valid) {
-		ImDrawData temp_data = draw_data; // Just copy
+	global::draw_mutex.lock();
+	if (global::draw_data) {
+		auto* temp_data = utils::copy_drawdata(global::draw_data); // Just copy
 		global::pContext->OMSetRenderTargets(1, &global::mainRenderTargetView, NULL);
-		ImGui_ImplDX11_RenderDrawData(&temp_data);
+		ImGui_ImplDX11_RenderDrawData(temp_data);
+		utils::free_drawdata(temp_data);
 	}
+	global::draw_mutex.unlock();
 
 	if (GetAsyncKeyState(VK_INSERT) & 1) {
 		show_menu = !show_menu;
