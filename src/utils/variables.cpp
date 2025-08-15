@@ -1,4 +1,4 @@
-#include "./variables.hpp"
+#include <template/utils/variables.hpp>
 
 namespace global {
   bool is_initialized = false;

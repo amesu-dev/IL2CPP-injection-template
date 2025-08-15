@@ -1,11 +1,11 @@
-#include "gui.hpp"
+#include <template/gui.hpp>
 // #include "menu.hpp"
 #include <thread>
 #include <chrono>
 #include <d3d11.h>
 
-#include "pages/visual.hpp"
-#include "pages/tests.hpp"
+#include <template/pages/visual.hpp>
+#include <template/pages/tests.hpp>
 
 #include <imgui/imgui_impl_dx11.h>
 
@@ -103,7 +103,7 @@ void render_gui() {
 	if (show_menu) {
 		draw_menu();
 	}
-	
+
 	// Take pages
 	if (!vpage) {
 		vpage = reinterpret_cast<visual_page*>((*pages.find(visual_page::name)).second);
@@ -111,17 +111,9 @@ void render_gui() {
 	}
 
 	if (vpage) {
-		vpage->change_fov(); //? Automaticly choice FOV
 		vpage->draw_snaplines(); //? Draw only if setting are true
+		if (vpage->is_crosshair()) vpage->draw_crosshair();
 	}
-	
-	if (vpage && vpage->is_crosshair()) {
-		vpage->draw_crosshair();
-	}
-
-	// if (vars::fov_check) {
-	// 	ImGui::GetForegroundDrawList()->AddCircle(ImVec2(vars::screen_center.x, vars::screen_center.y), vars::aim_fov, ImColor(255, 255, 255), 360);
-	// }
 
 	// ! End Scene !
 	ImGui::Render();
@@ -131,7 +123,7 @@ void render_gui() {
 	// global::draw_data = *ImGui::GetDrawData();
 	utils::free_drawdata(global::draw_data);
 	global::draw_data = utils::copy_drawdata(ImGui::GetDrawData());
-	
+
 	global::draw_mutex.unlock();
 }
 
@@ -143,6 +135,7 @@ LRESULT __stdcall WndProc(const HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lPar
 }
 
 uint64_t render_task_id = -1ULL;
+uint64_t last_tick = -1ULL;
 HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT Flags) {
 	void* m_pThisThread = IL2CPP::Thread::Attach(IL2CPP::Domain::Get());
 
@@ -185,15 +178,27 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 
 	// Render
 	try {
-		if (
-			render_task_id == -1ULL ||
-			global::t_pool.calculated(render_task_id)
-		) {
-			// Create new task if only there is no tasks
-			render_task_id = global::t_pool.add_task(render_gui);
-		}
+		// if (
+		// 	render_task_id == -1ULL ||
+		// 	global::t_pool.calculated(render_task_id)
+		// ) {
+		// 	// Create new task if only there is no tasks
+		// 	render_task_id = global::t_pool.add_task(render_gui);
+		// }
 		// render_gui();
+
+		
+		auto cur_tick = GetTickCount64();
+		if (cur_tick - last_tick > 1'000 / 15) {
+			render_gui();
+			last_tick = cur_tick;
+		}
 	} catch (...) {}
+
+	if (vpage) {
+		vpage->change_fov(); //? Automaticly choice FOV
+	}
+
 
 	// Wait for first draw data...
 	global::draw_mutex.lock();

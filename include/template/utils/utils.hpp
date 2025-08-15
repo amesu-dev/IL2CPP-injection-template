@@ -2,7 +2,7 @@
 #include <Il2cpp_Resolver/Includes.hpp>
 #include <imgui/imgui.h>
 
-#include "./types.hpp"
+#include <template/utils/types.hpp>
 
 namespace utils {
   /**

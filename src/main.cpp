@@ -6,8 +6,8 @@
 #include <Il2cpp_Resolver/il2cpp_resolver.hpp>
 #include <kiero/includes.h>
 
-#include "gui.hpp"
-#include "utils/variables.hpp"
+#include <template/gui.hpp>
+#include <template/utils/variables.hpp>
 
 struct enum_params {
 	HWND handle = nullptr;
@@ -75,10 +75,11 @@ void infcollect_player() {
 				global::player_list[i] = nullptr;
 				continue;
 			}
+			// printf("Player at 0x%p\n", list->At(i));
 
 			global::player_list[i] = PlayerManager(list->At(i));
 		}
-		
+
 		global::players_mutex.unlock();
 	}
 }

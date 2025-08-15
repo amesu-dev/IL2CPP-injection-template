@@ -8,9 +8,9 @@
 // #include <imgui/imgui_impl_win32.h>
 #include <kiero/Rendering.hpp>
 
-#include "menu.hpp"
-#include "utils/Font.h"
-#include "utils/variables.hpp"
+#include <template/menu.hpp>
+#include <template/utils/Font.h>
+#include <template/utils/variables.hpp>
 
 void init_gui();
 void render_gui();

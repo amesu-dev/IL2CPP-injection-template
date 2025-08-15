@@ -1,5 +1,5 @@
-#include "./utils.hpp"
-#include "./variables.hpp"
+#include <template/utils/utils.hpp>
+#include <template/utils/variables.hpp>
 
 #include <malloc.h>
 
@@ -21,6 +21,9 @@ namespace utils {
     auto* world2screen_ptr = (Unity::Vector3 (__cdecl*) (void*, Unity::Vector3))(global::GameAssembly + 0x3237EA0); // w2screen
     Unity::Vector3 buffer = world2screen_ptr(camera, world_pos);
 
+    printf("Success called w2screen!\n");
+    // system("pause");
+    // Sleep(30'000);
 		out_screen->x = buffer.x;
     out_screen->y = global::viewport.Height - buffer.y;
 

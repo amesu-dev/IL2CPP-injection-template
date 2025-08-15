@@ -1,9 +1,9 @@
-#include "menu.hpp"
+#include <template/menu.hpp>
 
 #include <exception>
 
-#include "pages/visual.hpp"
-#include "pages/tests.hpp"
+#include <template/pages/visual.hpp>
+#include <template/pages/tests.hpp>
 
 std::unordered_map<std::string, cheat_page* const> pages = std::unordered_map<std::string, cheat_page* const>({
 	{ visual_page::name, new visual_page() },

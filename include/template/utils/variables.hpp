@@ -1,5 +1,5 @@
 #pragma once
-#include "./types.hpp"
+#include <template/utils/types.hpp>
 
 #include <windows.h>
 #include <array>
