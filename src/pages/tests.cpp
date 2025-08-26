@@ -114,8 +114,8 @@ void test_page::test_offset() {
 
 void test_page::test_function_address() {
   void* func = IL2CPP::ResolveCall(this->function_name);
-  if (!func) printf("Function '%s' not found\n", this->function_name);
+  if (!func) return (void) printf("Function '%s' not found\n", this->function_name);
   
-  printf("Function '%s' at 0x%p", this->function_name, func);
+  printf("Function '%s' at 0x%p\n", this->function_name, func);
 }
 
