@@ -11,18 +11,27 @@ void test_page::draw() {
     ImGui::BeginGroup();
     ImGui::InputText("Module", this->module_name, this->ns_name_length);
     ImGui::InputText("Namespace", this->namespace_name, this->ns_name_length);
-    ImGui::InputText("Class name", this->class_name, this->ns_name_length);
-    
+
     if (ImGui::Button("Make test namespace")) {
       this->test_namespace();
     }
-    ImGui::SameLine(0, 12);
+    
+    ImGui::Separator();
+    
+    ImGui::InputText("Class name", this->class_name, this->ns_name_length);
+    ImGui::InputText("Function name", this->function_name, this->ns_name_length);
+    
     if (ImGui::Button("Make check all obj addresses")) {
       this->test_address();
     }
+    
     // ImGui::SameLine(0, 12);
+    
     if (ImGui::Button("Fetch all fields in class")) {
       this->test_offset();
+    }
+    if (ImGui::Button("Fetch function address")) {
+      this->test_function_address();
     }
     ImGui::EndGroup();
 }
@@ -102,3 +111,11 @@ void test_page::test_offset() {
   }
   printf("------------------------------------------\n");
 }
+
+void test_page::test_function_address() {
+  void* func = IL2CPP::ResolveCall(this->function_name);
+  if (!func) printf("Function '%s' not found\n", this->function_name);
+  
+  printf("Function '%s' at 0x%p", this->function_name, func);
+}
+

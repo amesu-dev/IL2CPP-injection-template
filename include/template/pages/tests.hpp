@@ -25,6 +25,7 @@ protected:
   char module_name[ns_name_length];
   char namespace_name[ns_name_length];
   char class_name[ns_name_length];
+  char function_name[ns_name_length];
 
 private:
   void test();
@@ -34,4 +35,6 @@ private:
   void test_address();
 
   void test_offset();
+  
+  void test_function_address();
 };
