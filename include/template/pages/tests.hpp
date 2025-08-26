@@ -22,6 +22,7 @@ protected:
   std::vector<Unity::il2cppClass*> m_vClasses;
 
   static inline const int ns_name_length = 128;
+  char module_name[ns_name_length];
   char namespace_name[ns_name_length];
   char class_name[ns_name_length];
 

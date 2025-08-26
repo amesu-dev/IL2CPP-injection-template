@@ -58,33 +58,6 @@ void initvars() {
 	printf("\n");
 }
 
-void infcollect_player() {
-	for (
-		// Infinity, sleep 10 sec on each round 
-		; true ; std::this_thread::sleep_for(std::chrono::seconds(3))
-	) {
-		if (!global::is_initialized) continue;
-		global::players_mutex.lock();
-
-		auto* list = Unity::Object::FindObjectsOfType<void>("BAPBAP.Player.PlayerManager");
-		if(!list) continue;
-
-		for (int i = 0; i < list->m_uMaxLength; i++) {
-			if (!list->At(i)) {
-				// ! Implicit conversion !
-				global::player_list[i] = nullptr;
-				continue;
-			}
-			// printf("Player at 0x%p\n", list->At(i));
-
-			global::player_list[i] = PlayerManager(list->At(i));
-		}
-
-		global::players_mutex.unlock();
-	}
-}
-
-
 void initchair() {
 #define DEBUG
 #ifdef DEBUG
@@ -99,7 +72,6 @@ void initchair() {
 	kiero::bind(8, (void**)&global::orig_Present, hkPresent); //? For drawing using Game DirectX
 
 	// CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)hkPresent, NULL, NULL, NULL);
-	CreateThread(NULL, NULL, (LPTHREAD_START_ROUTINE)infcollect_player, NULL, NULL, NULL);
 }
 
 DWORD WINAPI MainThread(LPVOID lpReserved) {

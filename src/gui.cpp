@@ -210,10 +210,8 @@ HRESULT __stdcall hkPresent(IDXGISwapChain* pSwapChain, UINT SyncInterval, UINT 
 	}
 	global::draw_mutex.unlock();
 
-	if (GetAsyncKeyState(VK_INSERT) & 1) {
+	if (GetAsyncKeyState(VK_INSERT) & 1)
 		show_menu = !show_menu;
-		ImGui::GetIO().MouseDrawCursor = show_menu;
-	}
 
 	if (GetKeyState(VK_END) & 1) {
 		MH_DisableHook(MH_ALL_HOOKS);

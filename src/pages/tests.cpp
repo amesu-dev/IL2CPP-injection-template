@@ -9,8 +9,9 @@ void test_page::draw() {
     ImGui::Separator();
     
     ImGui::BeginGroup();
-    ImGui::InputText("Fetch namespace", this->namespace_name, this->ns_name_length);
-    ImGui::InputText("Fetch class name", this->class_name, this->ns_name_length);
+    ImGui::InputText("Module", this->module_name, this->ns_name_length);
+    ImGui::InputText("Namespace", this->namespace_name, this->ns_name_length);
+    ImGui::InputText("Class name", this->class_name, this->ns_name_length);
     
     if (ImGui::Button("Make test namespace")) {
       this->test_namespace();
@@ -19,7 +20,7 @@ void test_page::draw() {
     if (ImGui::Button("Make check all obj addresses")) {
       this->test_address();
     }
-    ImGui::SameLine(0, 12);
+    // ImGui::SameLine(0, 12);
     if (ImGui::Button("Fetch all fields in class")) {
       this->test_offset();
     }
@@ -52,7 +53,8 @@ void test_page::test() {
 }
 
 void test_page::test_namespace() {
-  IL2CPP::Class::FetchClasses(&this->m_vClasses, "Assembly-CSharp", namespace_name);
+  // if (!) return;
+  IL2CPP::Class::FetchClasses(&this->m_vClasses, this->module_name, namespace_name);
 
   if (!m_vClasses.size()) printf("No classes found!\n");
   else {
@@ -93,10 +95,10 @@ void test_page::test_offset() {
   std::vector<Unity::il2cppFieldInfo *> fields;
   IL2CPP::Class::FetchFields(game_class, &fields);
 
-  printf("------------------------------------------");
-  printf("Class '%s ' fields:\n", this->class_name);
+  printf("------------------------------------------\n");
+  printf("Class '%s' fields:\n", this->class_name);
   for (auto* field : fields) {
     printf("%s (0x%x)\n", field->m_pName, field->m_iOffset); // Field (0x00)
   }
-  printf("------------------------------------------");
+  printf("------------------------------------------\n");
 }
